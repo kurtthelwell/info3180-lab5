@@ -5,7 +5,9 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
+from app import app, db
+from app.models import Movie
+from app.forms import MovieForm
 from flask import render_template, request, jsonify, send_file
 import os
 
@@ -17,6 +19,33 @@ import os
 @app.route('/')
 def index():
     return jsonify(message="This is the beginning of our API")
+
+
+@app.route('/api/v1/movies', methods=['POST'])
+def movies():
+    form = MovieForm()
+
+    if form.validate_on_submit():
+        poster_file = form.poster.data
+        filename = poster_file.filename
+        poster_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        movie = Movie(
+            title=form.title.data,
+            description=form.description.data,
+            poster=filename
+        )
+        db.session.add(movie)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Movie Successfully added",
+            "title": movie.title,
+            "poster": movie.poster,
+            "description": movie.description
+        }), 201
+
+    return jsonify({"errors": form_errors(form)}), 422
 
 
 ###
