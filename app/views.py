@@ -59,7 +59,7 @@ def movies():
 ###
 
 # Here we define a function to collect form errors from Flask-WTF
-# which we can later use
+
 def form_errors(form):
     error_messages = []
     """Collects form errors"""
